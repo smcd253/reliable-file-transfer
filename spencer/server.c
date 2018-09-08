@@ -10,24 +10,10 @@
  
 #define IP_PROTOCOL 0
 #define PORT_NO 15050
-#define NET_BUF_SIZE 32
+#define BUFFER_SIZE 32
 #define cipherKey 'S'
 #define sendrecvflag 0
 #define nofile "File Not Found!"
- 
-// funtion to clear buffer
-void clearBuf(char* b)
-{
-    int i;
-    for (i = 0; i < NET_BUF_SIZE; i++)
-        b[i] = '\0';
-}
- 
-// funtion to encrypt
-char Cipher(char ch)
-{
-    return ch ^ cipherKey;
-}
  
 // funtion sending file
 int sendFile(FILE* fp, char* buf, int s)
@@ -42,11 +28,11 @@ int sendFile(FILE* fp, char* buf, int s)
         return 1;
     }
  
-    char ch, ch2;
+    char ch;
     for (i = 0; i < s; i++) {
         ch = fgetc(fp);
-        ch2 = Cipher(ch);
-        buf[i] = ch2;
+        //ch2 = Cipher(ch);
+        buf[i] = ch;
         if (ch == EOF)
             return 1;
     }
@@ -62,7 +48,7 @@ int main()
     addr_con.sin_family = AF_INET;
     addr_con.sin_port = htons(PORT_NO);
     addr_con.sin_addr.s_addr = INADDR_ANY;
-    char net_buf[NET_BUF_SIZE];
+    char buffer[BUFFER_SIZE];
     FILE* fp;
  
     // socket()
@@ -83,14 +69,14 @@ int main()
         printf("\nWaiting for file name...\n");
  
         // receive file name
-        clearBuf(net_buf);
- 
-        nBytes = recvfrom(sockfd, net_buf,
-                          NET_BUF_SIZE, sendrecvflag,
+        bzero(buffer, BUFFER_SIZE);
+
+        nBytes = recvfrom(sockfd, buffer,
+                          BUFFER_SIZE, sendrecvflag,
                           (struct sockaddr*)&addr_con, &addrlen);
  
-        fp = fopen(net_buf, "r");
-        printf("\nFile Name Received: %s\n", net_buf);
+        fp = fopen(buffer, "r");
+        printf("\nFile Name Received: %s\n", buffer);
         if (fp == NULL)
             printf("\nFile open failed!\n");
         else
@@ -99,18 +85,18 @@ int main()
         while (1) {
  
             // process
-            if (sendFile(fp, net_buf, NET_BUF_SIZE)) {
-                sendto(sockfd, net_buf, NET_BUF_SIZE,
+            if (sendFile(fp, buffer, BUFFER_SIZE)) {
+                sendto(sockfd, buffer, BUFFER_SIZE,
                        sendrecvflag, 
                     (struct sockaddr*)&addr_con, addrlen);
                 break;
             }
  
             // send
-            sendto(sockfd, net_buf, NET_BUF_SIZE,
+            sendto(sockfd, buffer, BUFFER_SIZE,
                    sendrecvflag,
                 (struct sockaddr*)&addr_con, addrlen);
-            clearBuf(net_buf);
+            bzero(buffer, BUFFER_SIZE);
         }
         if (fp != NULL)
             fclose(fp);

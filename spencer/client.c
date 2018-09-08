@@ -11,37 +11,33 @@
 #define IP_PROTOCOL 0
 #define IP_ADDRESS "127.0.0.1" // localhost
 #define PORT_NO 15050
-#define NET_BUF_SIZE 32
+#define BUFFER_SIZE 32
 #define cipherKey 'S'
 #define sendrecvflag 0
  
-// funtion to clear buffer
-void clearBuf(char* b)
+char* concat(const char *s1, const char *s2)
 {
-    int i;
-    for (i = 0; i < NET_BUF_SIZE; i++)
-        b[i] = '\0';
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
 }
- 
-// function for decryption
-char Cipher(char ch)
-{
-    return ch ^ cipherKey;
-}
- 
+
 // function to receive file
-int recvFile(char* buf, int s)
+int recvFile(FILE* rf, char* buf, int s)
 {
     int i;
     char ch;
     for (i = 0; i < s; i++) {
         ch = buf[i];
-        ch = Cipher(ch);
         if (ch == EOF)
             return 1;
         else
+            fprintf(rf, "%c", ch);
             printf("%c", ch);
     }
+    
     return 0;
 }
  
@@ -54,7 +50,8 @@ int main()
     addr_con.sin_family = AF_INET;
     addr_con.sin_port = htons(PORT_NO);
     addr_con.sin_addr.s_addr = inet_addr(IP_ADDRESS);
-    char net_buf[NET_BUF_SIZE];
+    char buffer[BUFFER_SIZE];
+    char fileNameBuf[BUFFER_SIZE];
     FILE* fp;
  
     // socket()
@@ -62,31 +59,38 @@ int main()
                     IP_PROTOCOL);
  
     if (sockfd < 0)
-        printf("\nfile descriptor not received!!\n");
+        printf("\nsocket file descriptor not received!!\n");
     else
-        printf("\nfile descriptor %d received\n", sockfd);
- 
+        printf("\nsocket file descriptor %d received\n", sockfd);
+    
+
     while (1) {
         printf("\nPlease enter file name to receive:\n");
-        scanf("%s", net_buf);
-        sendto(sockfd, net_buf, NET_BUF_SIZE,
+        scanf("%s", fileNameBuf);
+        sendto(sockfd, fileNameBuf, BUFFER_SIZE,
                sendrecvflag, (struct sockaddr*)&addr_con,
                addrlen);
- 
+
+        // create file to write received buffer to
+        char rcvBufAppend[9] = "received-";
+        FILE* receivedFile = fopen(concat(rcvBufAppend, fileNameBuf), "w");
+
         printf("\n---------Data Received---------\n");
  
         while (1) {
             // receive
-            clearBuf(net_buf);
-            nBytes = recvfrom(sockfd, net_buf, NET_BUF_SIZE,
+            bzero(buffer, BUFFER_SIZE);
+            nBytes = recvfrom(sockfd, buffer, BUFFER_SIZE,
                               sendrecvflag, (struct sockaddr*)&addr_con,
                               &addrlen);
  
             // process
-            if (recvFile(net_buf, NET_BUF_SIZE)) {
+            if (recvFile(receivedFile, buffer, BUFFER_SIZE)) {
                 break;
             }
         }
+        if(receivedFile != NULL)
+            fclose(receivedFile);
         printf("\n-------------------------------\n");
     }
     return 0;
