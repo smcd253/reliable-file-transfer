@@ -2,6 +2,11 @@
 An application-level file transfer protocol built on top of UDP using novel bandwidth-monitoring techniques to beat FTP and SCP throughputs.
 
 
+Binary file command: 
+- mac: dd if=/dev/urandom of=data.bin bs=1m count=1000
+- ubuntu: dd if=/dev/urandom of=data.bin bs=1M count=1000
+- diff: https://stackoverflow.com/questions/12118403/how-to-compare-binary-files-to-check-if-they-are-the-same
+
 Different Methods: https://www.keycdn.com/support/udp-file-transfer/ 
 
 40 Mb solution: https://github.com/lsingal/Fast-and-Reliable-File-Transfer-over-UDP
