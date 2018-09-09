@@ -34,8 +34,10 @@ int recvFile(FILE* rf, char* buf, int s)
         if (ch == EOF)
             return 1;
         else
+        {
             fprintf(rf, "%c", ch);
             printf("%c", ch);
+        } 
     }
     
     return 0;
@@ -74,7 +76,11 @@ int main()
         // create file to write received buffer to
         char rcvBufAppend[9] = "received-";
         FILE* receivedFile = fopen(concat(rcvBufAppend, fileNameBuf), "w");
-
+        if (receivedFile == NULL)
+        {
+            printf("Error opening file!\n");
+            exit(1);
+        }
         printf("\n---------Data Received---------\n");
  
         while (1) {

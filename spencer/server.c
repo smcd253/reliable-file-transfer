@@ -23,8 +23,8 @@ int sendFile(FILE* fp, char* buf, int s)
         strcpy(buf, nofile);
         len = strlen(nofile);
         buf[len] = EOF;
-        for (i = 0; i <= len; i++)
-            buf[i] = Cipher(buf[i]);
+        // for (i = 0; i <= len; i++)
+        //     buf[i] = Cipher(buf[i]);
         return 1;
     }
  
