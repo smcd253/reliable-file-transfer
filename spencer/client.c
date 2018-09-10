@@ -72,10 +72,16 @@ int main()
             nBytes = recvfrom(sockfd, buffer, BUFFER_SIZE,
                               sendrecvflag, (struct sockaddr*)&addr_con,
                               &addrlen);
+            // debug packet
+            printf("Buffer Debug:\n");
+            for (int i = 0; i < strlen(buffer); i++)
+                printf(buffer[i]);                
+            printf("\n");
         }
         if(receivedFile != NULL)
             fclose(receivedFile);
         printf("\n-------------------------------\n");
+        printf("macmodmade\n");
     }
     return 0;
 }

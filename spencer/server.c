@@ -94,15 +94,11 @@ int main()
             printf("\nFile Successfully opened!\n");
  
         while (fread(buffer, sizeof(buffer), BUFFER_SIZE, fp) == BUFFER_SIZE) {
-            // read BUFFER_SIZE chunk from file
-            // if (fread(buffer, sizeof(buffer), BUFFER_SIZE, fp) == BUFFER_SIZE)
-            // {
-            //     sendto(sockfd, buffer, BUFFER_SIZE,
-            //            sendrecvflag, 
-            //         (struct sockaddr*)&addr_con, addrlen);
-            //     break;
-            // }
- 
+            // debug
+            printf("Buffer Debug:\n");
+            for (int i = 0; i < strlen(buffer); i++)
+                printf(buffer[i]);                
+            printf("\n");
             // send
             sendto(sockfd, buffer, BUFFER_SIZE,
                    sendrecvflag,
@@ -112,17 +108,17 @@ int main()
         if (fp != NULL)
             fclose(fp);
 
-        char rcvBufAppend[9] = "received-";
-        FILE* receivedFile = fopen(concat(rcvBufAppend, "hello.txt"), "wb");
-        // debug
-        while (fwrite(buffer, sizeof(char), strlen(buffer), receivedFile) > 0) 
-        {
-            // receive packet
-            bzero(buffer, BUFFER_SIZE);
-            nBytes = recvfrom(sockfd, buffer, BUFFER_SIZE,
-                            sendrecvflag, (struct sockaddr*)&addr_con,
-                            &addrlen);
-        }
+        // char rcvBufAppend[9] = "received-";
+        // FILE* receivedFile = fopen(concat(rcvBufAppend, "hello.txt"), "wb");
+        // // debug
+        // while (fwrite(buffer, sizeof(char), strlen(buffer), receivedFile) > 0) 
+        // {
+        //     // receive packet
+        //     bzero(buffer, BUFFER_SIZE);
+        //     nBytes = recvfrom(sockfd, buffer, BUFFER_SIZE,
+        //                     sendrecvflag, (struct sockaddr*)&addr_con,
+        //                     &addrlen);
+        // }
     }
     return 0;
 }
