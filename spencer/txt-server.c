@@ -13,19 +13,10 @@
 #define IP_PROTOCOL 0
 #define PORT_NO 15050
 #define BUFFER_SIZE 32
+#define cipherKey 'S'
 #define sendrecvflag 0
 #define nofile "File Not Found!"
  
-
-char* concat(const char *s1, const char *s2)
-{
-    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-    // --------------  in real code you would check for errors in malloc here ----------------------
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
 // funtion sending file
 int sendFile(FILE* fp, char* buf, int s)
 {
@@ -86,22 +77,22 @@ int main()
                           BUFFER_SIZE, sendrecvflag,
                           (struct sockaddr*)&addr_con, &addrlen);
  
-        fp = fopen(buffer, "rb");
+        fp = fopen(buffer, "r");
         printf("\nFile Name Received: %s\n", buffer);
         if (fp == NULL)
             printf("\nFile open failed!\n");
         else
             printf("\nFile Successfully opened!\n");
  
-        while (fread(buffer, sizeof(buffer), BUFFER_SIZE, fp) == BUFFER_SIZE) {
-            // read BUFFER_SIZE chunk from file
-            // if (fread(buffer, sizeof(buffer), BUFFER_SIZE, fp) == BUFFER_SIZE)
-            // {
-            //     sendto(sockfd, buffer, BUFFER_SIZE,
-            //            sendrecvflag, 
-            //         (struct sockaddr*)&addr_con, addrlen);
-            //     break;
-            // }
+        while (1) {
+ 
+            // process
+            if (sendFile(fp, buffer, BUFFER_SIZE)) {
+                sendto(sockfd, buffer, BUFFER_SIZE,
+                       sendrecvflag, 
+                    (struct sockaddr*)&addr_con, addrlen);
+                break;
+            }
  
             // send
             sendto(sockfd, buffer, BUFFER_SIZE,
@@ -111,18 +102,6 @@ int main()
         }
         if (fp != NULL)
             fclose(fp);
-
-        char rcvBufAppend[9] = "received-";
-        FILE* receivedFile = fopen(concat(rcvBufAppend, "hello.txt"), "wb");
-        // debug
-        while (fwrite(buffer, sizeof(char), strlen(buffer), receivedFile) > 0) 
-        {
-            // receive packet
-            bzero(buffer, BUFFER_SIZE);
-            nBytes = recvfrom(sockfd, buffer, BUFFER_SIZE,
-                            sendrecvflag, (struct sockaddr*)&addr_con,
-                            &addrlen);
-        }
     }
     return 0;
 }
