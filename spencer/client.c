@@ -16,72 +16,77 @@
 #define BUFFER_SIZE 32
 #define sendrecvflag 0
  
-char* concat(const char *s1, const char *s2)
-{
-    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-    // --------------  in real code you would check for errors in malloc here ----------------------
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
+#define FILENAMELENGTH 30
+#define data_size 1400
+#define UDP_BURST 5
+struct Init_Packet{
+    u_int file_size;
+    u_int rcv_packet_size;
+};
+struct Data_Packet{
+    u_int sequence_number;
+    unsigned char data[data_size];
+};
  
 // driver code
 int main()
 {
     int sockfd, nBytes;
     struct sockaddr_in addr_con;
-    int addrlen = sizeof(addr_con);
+    socklen_t addrlen = sizeof(addr_con);
     addr_con.sin_family = AF_INET;
     addr_con.sin_port = htons(PORT_NO);
     addr_con.sin_addr.s_addr = inet_addr(IP_ADDRESS);
-    char buffer[BUFFER_SIZE];
-    char fileNameBuf[BUFFER_SIZE];
-    FILE* fp;
+
+    // buff stuff
+    int init_packet_size = sizeof(struct Init_Packet);
+    int data_packet_size = sizeof(struct Data_Packet);
+    char init_buffer[init_packet_size];
+    char buffer[data_packet_size];
+    FILE* oFile;
  
     // socket()
-    sockfd = socket(AF_INET, SOCK_DGRAM,
-                    IP_PROTOCOL);
+    sockfd = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL);
  
     if (sockfd < 0)
         printf("\nsocket file descriptor not received!!\n");
     else
         printf("\nsocket file descriptor %d received\n", sockfd);
     
-
-    while (1) {
-        printf("\nPlease enter file name to receive:\n");
-        scanf("%s", fileNameBuf);
-        sendto(sockfd, fileNameBuf, BUFFER_SIZE,
-               sendrecvflag, (struct sockaddr*)&addr_con,
-               addrlen);
-
-        // create file to write received buffer to
-        char rcvBufAppend[9] = "received-";
-        FILE* receivedFile = fopen(concat(rcvBufAppend, fileNameBuf), "wb");
-        if (receivedFile == NULL)
-        {
-            printf("Error opening file!\n");
-            exit(1);
-        }
-        printf("\n---------Data Received---------\n");
- 
-        while (fwrite(buffer, sizeof(char), strlen(buffer), receivedFile) > 0) 
-        {
-            // receive packet
-            bzero(buffer, BUFFER_SIZE);
-            nBytes = recvfrom(sockfd, buffer, BUFFER_SIZE,
-                              sendrecvflag, (struct sockaddr*)&addr_con,
-                              &addrlen);
-            // debug packet
-            printf("Buffer Debug:\n");
-            for (int i = 0; i < strlen(buffer); i++)
-                printf(buffer[i]);                
-            printf("\n");
-        }
-        if(receivedFile != NULL)
-            fclose(receivedFile);
-        printf("\n-------------------------------\n");
-        printf("macmodmade\n");
+    // grab init packet to get num packets, packet size, and last packet size
+    while (nBytes != init_packet_size)
+    {
+        printf("am I here?\n");
+        bzero(init_buffer, init_packet_size);
+        printf("here?\n");
+        nBytes = recvfrom(sockfd, init_buffer, init_packet_size, sendrecvflag, (struct sockaddr*)&addr_con, &addrlen);
+        printf("stuck in while\n");
     }
+    struct Init_Packet* iPacket = (struct Init_Packet*)init_buffer;
+    printf("iPacket->file_size = %d", iPacket->file_size);
+    printf("iPacket->rcv_packet_size = %d", iPacket->rcv_packet_size);
+
+    // send init packet receive ack
+    char init_ack_buf[sizeof(char)] = "a";
+    for (int i = 0; i < UDP_BURST; i++)
+    {
+        sendto(sockfd, init_ack_buf, sizeof(char), sendrecvflag, (struct sockaddr*)&addr_con, addrlen);        
+    }
+
+    // send something to server
+    // sendto(sockfd, fileNameBuf, BUFFER_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
+
+
+    // // init_packet = init_buffer;
+    // int w_count = 0;
+    // for(w_count = 0; w_count < chunks - 1 ;w_count++)
+    // {
+    //     fwrite (buffer[w_count] , sizeof(char), data_size, oFile);
+    // }
+    // struct packet* recv_packet = (struct packet*)packet_tobe_sent; 
+    // printf ("recv_packet chunk no  : %d\n", recv_packet->sequence_number);
+    // fwrite (recv_packet->data, sizeof(char), final_chunk, oFile);
+    // /* the whole file is now loaded in the memory buffer. */
+
     return 0;
 }
