@@ -19,6 +19,7 @@
 #define FILENAMELENGTH 30
 #define data_size 1400
 #define UDP_BURST 5
+
 struct Init_Packet{
     u_int file_size;
     u_int rcv_packet_size;

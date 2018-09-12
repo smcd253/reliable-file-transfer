@@ -110,9 +110,16 @@ int main()
     char init_ack_buf[sizeof(char)];
     char ack_compare[sizeof(char)] = "a";
     
+    printf("init_packet.file_size = %d\n", init_packet.file_size);
+    printf("init_packet.send_packet_size = %d\n", init_packet.send_packet_size);
+
+    struct Init_Packet* iPacket = (struct Init_Packet*)packet_tobe_sent;
+    printf("iPacket->file_size = %x", iPacket->file_size);
+    printf("iPacket->rcv_packet_size = %d", iPacket->send_packet_size);
+
     while (strcmp(init_ack_buf, ack_compare) != 0)
     {
-        sendto(sockfd, packet_tobe_sent, sizeof(init_packet), sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
+        sendto(sockfd, packet_tobe_sent, sizeof(init_packet), sendrecvflag, (struct sockaddr*)&addr_con, addrlen);      
         recvfrom(sockfd, init_ack_buf, sizeof(char), sendrecvflag, (struct sockaddr*)&addr_con, &addrlen);
         bzero(init_ack_buf, sizeof(char));
     }
