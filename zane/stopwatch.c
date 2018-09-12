@@ -9,8 +9,10 @@ int main()
   /*
    * defined in time.h 
    * sources: 
-   * time.h defintions http://pubs.opengroup.org/onlinepubs/7908799/xsh/time.h.html 
-   * GNU tutorial: https://www.gnu.org/software/libc/manual/html_node/Elapsed-Time.html
+   * time.h defintions 
+   * http://pubs.opengroup.org/onlinepubs/7908799/xsh/time.h.html 
+   * GNU tutorial: 
+   * https://www.gnu.org/software/libc/manual/html_node/Elapsed-Time.html
    * Stevens Unix Network Programming Volume 1 Chapter 6 
    */
  
