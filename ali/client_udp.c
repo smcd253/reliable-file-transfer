@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
 {
    // file initializationa
 	FILE * pFile;
+	FILE *f2;
 	long lSize;
 
 	char data[60000];
@@ -78,6 +79,7 @@ int main(int argc, char *argv[])
   //opening up a file 
 
 	pFile = fopen ( "test.mov" , "rb" );
+	f2 = fopen ( "log_client.txt" , "w" );
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 
 	// obtain file size:
@@ -168,6 +170,15 @@ int main(int argc, char *argv[])
 	{
 		if(state_ch == 1)
 		{
+			fprintf(f2, "before update\n");
+			int b;
+			for(b = 0; b<chunks;b++)
+			{
+				fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
+				
+
+			}
+			fprintf(f2,"\n");
 			int send_count = 0;
 			for(send_count = 0; send_count < chunks-1; send_count++)
 			{
@@ -203,8 +214,14 @@ int main(int argc, char *argv[])
 				if(ack_packet1->type == 2)
 				{
 					printf("update received \n");
-					
-					
+					fprintf(f2, "update\n");
+					int b;
+					for(b = 0; b<chunks;b++)
+					{
+						fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
+
+					}
+					fprintf(f2,"\n");
 					state_ch = 1;
 				}
 				else if(ack_packet1->type == 3)
