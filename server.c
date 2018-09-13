@@ -119,9 +119,9 @@ int main(int argc, char *argv[])
 	while (1) 
 	{
 		n = recvfrom(sock,buf,data_size,0,(struct sockaddr *)&from,&fromlen);
-		printf("bytes received: %d\n",n);
+		
 		struct packet* data_packet = (struct packet*)buf;
-		printf("packet : %d \n", data_packet->type);
+		
 		type = data_packet->type;
 		if(type == 0)
 		{
