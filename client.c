@@ -252,6 +252,7 @@ int main(int argc, char *argv[])
 	printf("Here\n");
 	while(1)
 	{
+		
 		data_packet.type = 6;
 		data_packet.sequence_number = chunks-1;
 		memcpy(data_packet.data,buffer[chunks-1],data_size);
@@ -264,6 +265,7 @@ int main(int argc, char *argv[])
 		n = recvfrom(sock,buffer1,sizeof(struct ack_packet),0,(struct sockaddr *)&from, &length);
 		if(n > 0)
 		{
+			printf("Packet 5 received : \n")
 			struct ack_packet* ack_packet3 = (struct ack_packet*)buffer1;
 			printf("type last %d\n",ack_packet3->type);
 			if(ack_packet3->type == 5)
