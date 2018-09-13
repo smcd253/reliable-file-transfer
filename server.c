@@ -39,7 +39,7 @@ struct ack_packet{
 int main(int argc, char *argv[])
 {
 	FILE * oFile;
-	
+	FILE * f1;
 	int sock, length, n;
 	socklen_t fromlen;
 	struct sockaddr_in server;
@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
 	struct ack_packet ack_packet1;
 	int packet_counter = 0; 
 
+	f1 = fopen ( "log_server.txt" , "w" );
 	
 	/*if (argc < 2) 
 	{
@@ -144,9 +145,11 @@ int main(int argc, char *argv[])
 		else if(type == 2)
 		{
 			printf("Packet counter val %d\n",packet_counter);
+			//fprintf(f1,"Packet counter val %d\n",packet_counter);
 			
+			int b;
 			
-			
+			fprintf(f1,"\n");
 			if(packet_counter >= (chunks-2))
 			{
 				printf("All packets received except last \n");
@@ -154,16 +157,35 @@ int main(int argc, char *argv[])
 				memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
 				n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
 				if (n  < 0) error("sendto");
-				
+				fprintf(f1, "p: ");
+				for(b = 0; b<chunks;b++)
+				{
+					fprintf(f1,"%d",ack_packet1.packet_tracker[b]);
+
+				}
+				fprintf(f1,"\n");
+				break;
 			}
 			else
 			{
 				
 				ack_packet1.type = 2;
+				int b;
+				
 				memcpy(send_buffer,(unsigned char*)&ack_packet1,chunks*sizeof(char));
+
+				for(b = 0; b<chunks;b++)
+				{
+					fprintf(f1,"%d",ack_packet1.packet_tracker[b]);
+
+				}
+				fprintf(f1,"\n");
 				n = sendto(sock,send_buffer,sizeof(struct ack_packet),0,(struct sockaddr *)&from,fromlen);
 				if (n  < 0) error("sendto");
+				//fprintf(f1, "before sending\n");
 				
+				fprintf(f1,"\n");
+				fprintf(f1,"\n");
 
 			}
 
