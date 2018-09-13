@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 		type = data_packet->type;
 		if(type == 0)
 		{
-			ack_packet1.type = 0;
+			ack_packet1.type = 4;
 			memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
 			n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
 			if (n  < 0) error("sendto");
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 		break;
 	}
   
-  oFile = fopen ( "file/received_test1.mov" , "wb" );
+  oFile = fopen ( "received_test.bin" , "wb" );
 printf("3\n");
   int w_count = 0;
   for(w_count = 0; w_count<chunks-1;w_count++)
