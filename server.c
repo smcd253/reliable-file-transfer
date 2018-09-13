@@ -170,22 +170,9 @@ int main(int argc, char *argv[])
 			{
 				
 				ack_packet1.type = 2;
-				int b;
-				
-				memcpy(send_buffer,(unsigned char*)&ack_packet1,chunks*sizeof(char));
-
-				for(b = 0; b<chunks;b++)
-				{
-					fprintf(f1,"%d",ack_packet1.packet_tracker[b]);
-
-				}
-				fprintf(f1,"\n");
-				n = sendto(sock,send_buffer,sizeof(struct ack_packet),0,(struct sockaddr *)&from,fromlen);
+				memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
+				n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
 				if (n  < 0) error("sendto");
-				//fprintf(f1, "before sending\n");
-				
-				fprintf(f1,"\n");
-				fprintf(f1,"\n");
 
 			}
 
