@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define data_size 60000
+#define data_size 1400
 
 
 void error(const char *msg)
