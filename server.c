@@ -39,6 +39,7 @@ struct ack_packet{
 int main(int argc, char *argv[])
 {
 	FILE * oFile;
+	FILE * f1;
 	int sock, length, n;
 	socklen_t fromlen;
 	struct sockaddr_in server;
@@ -51,6 +52,8 @@ int main(int argc, char *argv[])
 	int type; 
 	struct ack_packet ack_packet1;
 	int packet_counter = 0; 
+
+	f1 = fopen ( "log_server.txt" , "w" );
 	
 	/*if (argc < 2) 
 	{
