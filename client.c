@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	if (sock < 0) error("socket");
 
 	server.sin_family = AF_INET;
-	hp = gethostbyname("127.0.0.1");
+	hp = gethostbyname("10.1.1.3");
 	if (hp==0) error("Unknown host");
 
 	bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
