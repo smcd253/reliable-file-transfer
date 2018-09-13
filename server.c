@@ -195,6 +195,7 @@ int main(int argc, char *argv[])
 			
 			for(s_count = 0;s_count<10;s_count++)
 			{
+				printf("Sending type5\n");
 				ack_packet1.type = 5;
 				memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
 				n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
