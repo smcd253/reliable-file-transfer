@@ -205,6 +205,7 @@ int main(int argc, char *argv[])
 			memcpy(buffer[data_packet->sequence_number],data_packet->data,final_chunk-1);
 			printf("2\n");
 			int s_count =0;
+			
 			for(s_count = 0;s_count<10;s_count++)
 			{
 				ack_packet1.type = 5;
