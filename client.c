@@ -199,6 +199,8 @@ int main(int argc, char *argv[])
 			printf("1\n");
 			data_packet.type = 2;
 			data_packet.sequence_number = -1;
+			memset(packet_tobe_sent,0,sizeof(struct packet));
+			memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
 			n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
 			printf("2\n");
 			if (n < 0) error("Sendto");
@@ -238,6 +240,8 @@ int main(int argc, char *argv[])
 				printf("1\n");
 				data_packet.type = 2;
 				data_packet.sequence_number = -1;
+				memset(packet_tobe_sent,0,sizeof(struct packet));
+				memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
 				n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
 				printf("2\n");
 				if (n < 0) error("Sendto");
