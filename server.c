@@ -119,9 +119,9 @@ int main(int argc, char *argv[])
 	while (1) 
 	{
 		n = recvfrom(sock,buf,data_size,0,(struct sockaddr *)&from,&fromlen);
-		printf("bytes received: %d\n",n);
+		
 		struct packet* data_packet = (struct packet*)buf;
-		printf("packet : %d \n", data_packet->type);
+		
 		type = data_packet->type;
 		if(type == 0)
 		{
@@ -200,17 +200,21 @@ int main(int argc, char *argv[])
 		printf("type %d\n",data_packet->type );
 		printf("Received seq no : %d\n",data_packet->sequence_number);
 		printf("1\n");
-		memcpy(buffer[data_packet->sequence_number],data_packet->data,final_chunk-1);
-		printf("2\n");
-		int s_count =0;
-		for(s_count = 0;s_count<2;s_count++)
+		if(data_packet->type == 1)
 		{
-			ack_packet1.type = 5;
-			memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
-			n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
-			if (n  < 0) error("sendto");
+			memcpy(buffer[data_packet->sequence_number],data_packet->data,final_chunk-1);
+			printf("2\n");
+			int s_count =0;
+			for(s_count = 0;s_count<10;s_count++)
+			{
+				ack_packet1.type = 5;
+				memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
+				n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
+				if (n  < 0) error("sendto");
+			}
+			break;
 		}
-		break;
+		
 	}
   
   oFile = fopen ( "received_test1.bin" , "wb" );
