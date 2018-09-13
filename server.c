@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 			{
 				
 				ack_packet1.type = 2;
-				
+				memcpy(send_buffer,(unsigned char*)&ack_packet1,chunks*sizeof(char));
 				n = sendto(sock,send_buffer,sizeof(struct ack_packet),0,(struct sockaddr *)&from,fromlen);
 				if (n  < 0) error("sendto");
 				
