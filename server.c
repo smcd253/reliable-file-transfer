@@ -197,8 +197,8 @@ int main(int argc, char *argv[])
 		n = recvfrom(sock,buf,final_chunk,0,(struct sockaddr *)&from,&fromlen);
 		printf("No of bytes received %d\n",n );
 		struct packet* data_packet = (struct packet*)buf;
-		printf("type %d\n",data_packet->type );
-		printf("Received seq no : %d\n",data_packet->sequence_number);
+		printf("type %d : Received seq no : %d \n",data_packet->type,data_packet->sequence_number);
+		
 		printf("1\n");
 		if(data_packet->type == 1)
 		{
@@ -213,6 +213,13 @@ int main(int argc, char *argv[])
 				if (n  < 0) error("sendto");
 			}
 			break;
+		}
+		else if(data_packet->type == 2)
+		{
+			ack_packet1.type = 3;
+			memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
+			n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
+			if (n  < 0) error("sendto");
 		}
 		
 	}
