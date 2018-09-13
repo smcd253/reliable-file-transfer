@@ -197,9 +197,13 @@ int main(int argc, char *argv[])
 			}
 			state_ch = 0;
 			ack_packet2.type = 2;
+			printf("1\n");
 			memset(packet_tobe_sent,0,sizeof(struct ack_packet));
+			printf("2\n");
 			memcpy(packet_tobe_sent,(const unsigned char*)&ack_packet2,sizeof(struct ack_packet));
+			printf("3\n");
 			n=sendto(sock,packet_tobe_sent,sizeof(struct ack_packet),0,(const struct sockaddr *)&server,length);
+			printf("4\n");
 			if (n < 0) error("Sendto");
 			printf("type: %d, \n",ack_packet2.type);
 		}
