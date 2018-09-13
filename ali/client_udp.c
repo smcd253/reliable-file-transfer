@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdbool.h>
  
-#define data_size 60000
+#define data_size 1400
 
 struct packet{
 	uint8_t type;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
 	buffer[count] = (char*) malloc (final_chunk*sizeof(char));
 	result = fread (buffer[count],1,final_chunk,pFile);
-	printf("File Size read: %d, count : %d\n", result,count);
+	printf("File Size read: %ld, count : %d\n", result,count);
 
 	
 
