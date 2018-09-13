@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 		printf("type %d : Received seq no : %d \n",data_packet->type,data_packet->sequence_number);
 		
 		printf("1\n");
-		if(data_packet->type == 1)
+		if(data_packet->type == 6)
 		{
 			memcpy(buffer[data_packet->sequence_number],data_packet->data,final_chunk-1);
 			printf("2\n");
@@ -235,53 +235,6 @@ printf("3\n");
   fwrite (buffer[w_count], sizeof(char), final_chunk, oFile);
   printf("5\n");
 
-/*
-  
-  while(1)
-  {
-    
-     n = recvfrom(sock,buf,data_size,0,(struct sockaddr *)&from,&fromlen);
-     if (n < 0) error("recvfrom");
-
-     struct packet* data_packet = (struct packet*)buf;
-     printf("Received seq no : %d\n",data_packet->sequence_number);
-     if(data_packet->sequence_number == -1)
-     {
-      break;
-     }
-     memcpy(buffer[data_packet->sequence_number],data_packet->data,data_size);
-     if(packet_counter >= chunks-1)
-     {
-      break;
-     }
-     
-     packet_counter++;
-  }
-  printf("Packets received: %d\n",packet_counter);
-  while(1)
-  {
-    //printf("stopped\n");
-  }
-  n = sendto(sock,"send last packet\n",20,0,(struct sockaddr *)&from,fromlen);
-       if (n  < 0) error("sendto");
-
-  n = recvfrom(sock,buf,final_chunk,0,(struct sockaddr *)&from,&fromlen);
-  struct packet* data_packet = (struct packet*)buf;
-   printf("Received seq no : %d\n",data_packet->sequence_number);
-   memcpy(buffer[data_packet->sequence_number],data_packet->data,data_size);
-
-   n = sendto(sock,"last packet received\n",20,0,(struct sockaddr *)&from,fromlen);
-       if (n  < 0) error("sendto");
-
-  oFile = fopen ( "file/received_test1.mov" , "wb" );
-
-   /*int w_count = 0;
-  for(w_count = 0; w_count<chunks-1;w_count++)
-  {
-    fwrite (buffer[w_count] , sizeof(char), data_size, oFile);
-  }
-  
-  fwrite (buffer[w_count], sizeof(char), final_chunk, oFile);*/
   fclose (oFile);
   close(sock);
   
