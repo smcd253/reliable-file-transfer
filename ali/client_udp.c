@@ -13,13 +13,20 @@
 #define data_size 60000
 
 struct packet{
-  u_int sequence_number;
-  unsigned char data[data_size];
+	unsigned char type;
+	int sequence_number;
+	unsigned char data[data_size];
 };
 
 struct Init_PACKET{
-  u_int file_size;
-  u_int chunk_size;
+	unsigned char type;
+	u_int file_size;
+	u_int chunk_size;
+};
+
+struct ack_packet{
+	unsigned char type;
+	bool * packet_received;
 };
 
 void error(const char *);
@@ -99,18 +106,54 @@ int main(int argc, char *argv[])
 	result = fread (buffer[count],1,final_chunk,pFile);
 	printf("File Size read: %d, count : %d\n", result,count);
 
-	
-
+	init_packet.type = 0;
 	init_packet.file_size = lSize;
 	init_packet.chunk_size = data_size;
 	send_buffer = (unsigned char*)malloc(sizeof(struct Init_PACKET));
 	memset(send_buffer,0,sizeof(struct Init_PACKET));
 	memcpy(send_buffer,(const unsigned char*)&init_packet,sizeof(init_packet));
+	n=sendto(sock,send_buffer,sizeof(init_packet),0,(const struct sockaddr *)&server,length);
+	if (n < 0) error("Sendto");
+	free(send_buffer);
+	printf("Init packet sent \n");
 	
-
-  
-  
-
+	int send_counter = 0;
+	while(1)
+	{
+		n = recvfrom(sock,buffer1,sizeof(struct Init_PACKET),0,(struct sockaddr *)&from, &length);
+		if(n > 0)
+		{
+			struct Init_PACKET* recv_init_packet = (struct Init_PACKET*)buffer1;
+			if(recv_init_packet->type == 0)
+			{
+				printf("Ack of init received \n");
+				break;
+			}
+			else
+			{
+				printf("sending Init packet again \n");
+			}
+			
+		}
+		else
+		{
+			for (send_counter = 0; send_counter<5;send_counter++)
+			{
+				init_packet.type = 0;
+				init_packet.file_size = lSize;
+				init_packet.chunk_size = data_size;
+				send_buffer = (unsigned char*)malloc(sizeof(struct Init_PACKET));
+				memset(send_buffer,0,sizeof(struct Init_PACKET));
+				memcpy(send_buffer,(const unsigned char*)&init_packet,sizeof(init_packet));
+				n=sendto(sock,send_buffer,sizeof(init_packet),0,(const struct sockaddr *)&server,length);
+				if (n < 0) error("Sendto");
+				free(send_buffer);
+				printf("Init packet no : %d\n",count);
+			}
+		}
+		
+	}
+	
   
 	//struct packet* recv_packet = (struct packet*)packet_tobe_sent; 
 	//printf("recv_packet chunk no  : %d\n", recv_packet->sequence_number);
@@ -118,11 +161,8 @@ int main(int argc, char *argv[])
 	/* the whole file is now loaded in the memory buffer. */
 
 	// terminate
-  
-	n=sendto(sock,send_buffer,sizeof(init_packet),0,(const struct sockaddr *)&server,length);
-	free(send_buffer);
-	if (n < 0) error("Sendto");
-	printf("Init packet sent \n");
+	
+	
 	n = recvfrom(sock,buffer1,256,0,(struct sockaddr *)&from, &length);
 	if (n < 0) error("recvfrom");
 	write(1,"Got an ack: \n",12);
@@ -140,6 +180,15 @@ int main(int argc, char *argv[])
 		n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
 		if (n < 0) error("Sendto");
 	}
+	printf("All packets sent first time \n");
+	data_packet.sequence_number = -1;
+	memcpy(data_packet.data,buffer[send_count],data_size);
+	memset(packet_tobe_sent,0,sizeof(struct packet));
+	memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
+  
+	n=sendto(sock,packet_tobe_sent,final_chunk,0,(const struct sockaddr *)&server,length);
+	if (n < 0) error("Sendto");
+
 	printf("Waiting for Ack to send last packet\n");
 	n = recvfrom(sock,buffer1,256,0,(struct sockaddr *)&from, &length);
 	if (n < 0) error("recvfrom");
