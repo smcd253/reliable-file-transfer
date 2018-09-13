@@ -230,6 +230,7 @@ int main(int argc, char *argv[])
 				else if(ack_packet1->type == 3)
 				{
 					printf("all packets received except last\n");
+					printf("type %d\n",ack_packet1->type);
 					break;
 				}
 				
