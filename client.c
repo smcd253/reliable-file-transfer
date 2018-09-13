@@ -209,7 +209,6 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			printf("stuck here\n");
 			n = recvfrom(sock,buffer1,sizeof(struct ack_packet),0,(struct sockaddr *)&from, &length);
 			if(n > 0)
 			{
