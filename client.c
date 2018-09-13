@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	if (sock < 0) error("socket");
 
 	server.sin_family = AF_INET;
-	hp = gethostbyname("10.1.1.2");
+	hp = gethostbyname("10.1.2.2");
 	if (hp==0) error("Unknown host");
 
 	bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
   //opening up a file 
 
-	pFile = fopen ( "data65.bin" , "rb" );
+	pFile = fopen ( "data.bin" , "rb" );
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 
 	// obtain file size:
