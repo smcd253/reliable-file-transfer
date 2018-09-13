@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 			printf("Packet 5 received : \n");
 			struct ack_packet* ack_packet3 = (struct ack_packet*)buffer1;
 			printf("type last %d\n",ack_packet3->type);
-			if(ack_packet3->type == 5)
+			if(ack_packet3->type == 5 || ack_packet3->type == 3)
 			{
 				printf("all packets sent \n");
 				break;
