@@ -17,34 +17,6 @@
 #define cipherKey 'S'
 #define sendrecvflag 0
  
-char* concat(const char *s1, const char *s2)
-{
-    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-    // in real code you would check for errors in malloc here
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
-// function to receive file
-int recvFile(FILE* rf, char* buf, int s)
-{
-    int i;
-    char ch;
-    for (i = 0; i < s; i++) {
-        ch = buf[i];
-        if (ch == EOF)
-            return 1;
-        else
-        {
-            fprintf(rf, "%c", ch);
-            printf("%c", ch);
-        } 
-    }
-    
-    return 0;
-}
- 
 // driver code
 int main()
 {
