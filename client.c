@@ -36,7 +36,6 @@ int main(int argc, char *argv[])
 {
    // file initializationa
 	FILE * pFile;
-	FILE *f2;
 	long lSize;
 
 	char data[60000];
@@ -69,7 +68,7 @@ int main(int argc, char *argv[])
 	if (sock < 0) error("socket");
 
 	server.sin_family = AF_INET;
-	hp = gethostbyname("127.0.0.1");
+	hp = gethostbyname("10.1.1.2");
 	if (hp==0) error("Unknown host");
 
 	bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
@@ -78,8 +77,7 @@ int main(int argc, char *argv[])
 
   //opening up a file 
 
-	pFile = fopen ( "test.mov" , "rb" );
-	f2 = fopen ( "log_client.txt" , "w" );
+	pFile = fopen ( "data65.bin" , "rb" );
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 
 	// obtain file size:
@@ -110,7 +108,7 @@ int main(int argc, char *argv[])
 
 	buffer[count] = (char*) malloc (final_chunk*sizeof(char));
 	result = fread (buffer[count],1,final_chunk,pFile);
-	printf("File Size read: %ld, count : %d\n", result,count);
+	printf("File Size read: %d, count : %d\n", result,count);
 
 	
 
@@ -127,7 +125,7 @@ int main(int argc, char *argv[])
 	
 	int send_counter = 0;
 
-	struct timeval timeout={1,0};
+	struct timeval timeout={0,10000};
     setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
 
 
@@ -170,15 +168,6 @@ int main(int argc, char *argv[])
 	{
 		if(state_ch == 1)
 		{
-			fprintf(f2, "before update\n");
-			int b;
-			for(b = 0; b<chunks;b++)
-			{
-				fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
-				
-
-			}
-			fprintf(f2,"\n");
 			int send_count = 0;
 			for(send_count = 0; send_count < chunks-1; send_count++)
 			{
@@ -195,10 +184,12 @@ int main(int argc, char *argv[])
 					printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 				}
 			}
+			printf("1\n");
 			state_ch = 0;
 			ack_packet2.type = 2;
 			memset(packet_tobe_sent,0,sizeof(struct ack_packet));
 			memcpy(packet_tobe_sent,(const unsigned char*)&ack_packet2,sizeof(struct ack_packet));
+			printf("2\n");
 			n=sendto(sock,packet_tobe_sent,sizeof(struct ack_packet),0,(const struct sockaddr *)&server,length);
 			if (n < 0) error("Sendto");
 			printf("type: %d, \n",ack_packet2.type);
@@ -214,14 +205,8 @@ int main(int argc, char *argv[])
 				if(ack_packet1->type == 2)
 				{
 					printf("update received \n");
-					fprintf(f2, "update\n");
-					int b;
-					for(b = 0; b<chunks;b++)
-					{
-						fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
-
-					}
-					fprintf(f2,"\n");
+					
+					
 					state_ch = 1;
 				}
 				else if(ack_packet1->type == 3)

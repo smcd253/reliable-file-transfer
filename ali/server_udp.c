@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define data_size 60000
+#define data_size 1400
 
 
 void error(const char *msg)
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
     break;
   }
   
-  oFile = fopen ( "file/received_test1.mov" , "wb" );
+  oFile = fopen ( "received_test1.mov" , "wb" );
 printf("3\n");
   int w_count = 0;
   for(w_count = 0; w_count<chunks-1;w_count++)
