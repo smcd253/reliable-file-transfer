@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 					
 					// error catch sendto and print out packet info
 					if (n < 0) error("Sendto");
-					printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
+					//printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 				}
 			}
 			/******************************************************************************************************
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 			
 			// error catch sendto and print out packet info
 			if (n < 0) error("Sendto");
-			printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
+			//printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 			
 		}
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 				if(ack_packet1->type == 2)
 				{
 					// print and log updated sequence
-					printf("update received \n");
+					//printf("update received \n");
 					fprintf(f2, "update\n");
 					int b;
 					for(b = 0; b < chunks;b++)
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
 				n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
 			
 				if (n < 0) error("Sendto");
-				printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
+				//printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 			}
 		}
 		
@@ -313,13 +313,13 @@ int main(int argc, char *argv[])
 		memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
 		n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
 		if (n < 0) error("Sendto");
-		printf("type: %d, sequence number : %d , Bytes sent : %d\n",data_packet.type,data_packet.sequence_number,n);
+		//printf("type: %d, sequence number : %d , Bytes sent : %d\n",data_packet.type,data_packet.sequence_number,n);
 		
 		// wait for ack of receipt of final packet
 		n = recvfrom(sock,buffer1,sizeof(struct ack_packet),0,(struct sockaddr *)&from, &length);
 		if(n > 0)
 		{
-			printf("Packet 5 received : \n");
+			printf("Packet Type 5 (cummulative ack) received : \n");
 			struct ack_packet* ack_packet3 = (struct ack_packet*)buffer1;
 			printf("type last %d\n",ack_packet3->type);
 			if(ack_packet3->type == 5 || ack_packet3->type == 3)

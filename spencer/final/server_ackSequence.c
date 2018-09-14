@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 	if (n  < 0) error("sendto");
 	mem_alloc_ch = 1;
 	printf("allocating memory done \n");
-	printf("Now waiting for data\n");
+	printf("waiting for data...\n");
 
 	/******************************************************************************************************
 	 * Step 2: wait for type 1 data packets
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 			// process only if we haven't received the packet beforehand
 			if(ack_packet1.packet_tracker[data_packet->sequence_number] <= 0) 
 			{
-				printf("Received seq no : %d\n",data_packet->sequence_number);
+				//printf("Received seq no : %d\n",data_packet->sequence_number);
 				memcpy(buffer[data_packet->sequence_number],data_packet->data,data_size); // store
 				ack_packet1.packet_tracker[data_packet->sequence_number] = 1; // update ack sequence
 				packet_counter++;
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 		// if packet if of type 2 (client requesting updated ack sequence), send updated ack sequence
 		else if(type == 2)
 		{
-			printf("Packet counter val %d\n",packet_counter);			
+			//printf("Packet counter val %d\n",packet_counter);			
 			int b;
 			fprintf(f1,"\n");
 
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 		n = recvfrom(sock,buf,final_chunk,0,(struct sockaddr *)&from,&fromlen);
 		printf("No of bytes received %d\n",n );
 		struct packet* data_packet = (struct packet*)buf;
-		printf("type %d : Received seq no : %d \n",data_packet->type,data_packet->sequence_number);
+		//printf("type %d : Received seq no : %d \n",data_packet->type,data_packet->sequence_number);
 
 		// if packet is of type 6, send type 5 ack (transaction done)
 		if(data_packet->type == 6)
@@ -253,15 +253,13 @@ int main(int argc, char *argv[])
 	 * Step 4: write memory buffer to file
 	*******************************************************************************************************/
 	oFile = fopen ( "received_test1.bin" , "wb" );
-	printf("3\n");
 	int w_count = 0;
 	for(w_count = 0; w_count<chunks-1;w_count++)
 	{
 		fwrite (buffer[w_count] , sizeof(char), data_size, oFile);
 	}
-	printf("4\n");
+
 	fwrite (buffer[w_count], sizeof(char), final_chunk, oFile);
-	printf("5\n");
 
 	fclose (oFile);
 	close(sock);
