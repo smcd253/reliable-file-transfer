@@ -201,7 +201,10 @@ int main(int argc, char *argv[])
 
 	/******************************************************************************************************
 	 * STEP 2a: send data (packet type 1)
-	*******************************************************************************************************/	
+	*******************************************************************************************************/
+	// start timer as we start sending data
+	clock_gettime(CLOCK_REALTIME , &start);
+	printf("Started timer!\n");	
 	packet_tobe_sent = (unsigned char*)malloc(sizeof(struct packet));
 	while(1)
 	{
@@ -217,10 +220,6 @@ int main(int argc, char *argv[])
 				fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
 			}
 			fprintf(f2,"\n");
-
-			// start timer as we start sending data
-			clock_gettime(CLOCK_REALTIME , &start);
-			printf("Started timer!\n");
 
 			// send out missing data packets (type 1)
 			int send_count = 0;
