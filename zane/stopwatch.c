@@ -25,7 +25,7 @@ int main()
 
   clock_gettime(CLOCK_REALTIME, &stop);
 
-  total = stop.tv_sec - start.tv_sec;
+  total = stop.tv_sec - start.tv_sec + (double)(stop.tv_nsec - start.tv_nsec)/1000000000;
     
   printf("%f seconds\n", total);
  
