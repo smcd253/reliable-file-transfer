@@ -175,6 +175,8 @@ int main(int argc, char *argv[])
 			for(b = 0; b<chunks;b++)
 			{
 				fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
+				
+
 			}
 			fprintf(f2,"\n");
 			int send_count = 0;
@@ -208,11 +210,10 @@ int main(int argc, char *argv[])
 		else
 		{
 			n = recvfrom(sock,buffer1,sizeof(struct ack_packet),0,(struct sockaddr *)&from, &length);
-			ack_packet1 = (struct ack_packet*)buffer1;
-			printf("type %d\n",ack_packet1->type);
 			if(n > 0)
 			{
-				
+				printf("Bytes read %d\n",n);
+				ack_packet1 = (struct ack_packet*)buffer1;
 				if(ack_packet1->type == 2)
 				{
 					printf("update received \n");
@@ -229,6 +230,7 @@ int main(int argc, char *argv[])
 				else if(ack_packet1->type == 3)
 				{
 					printf("all packets received except last\n");
+					printf("type %d\n",ack_packet1->type);
 					break;
 				}
 				
@@ -252,8 +254,7 @@ int main(int argc, char *argv[])
 	printf("Here\n");
 	while(1)
 	{
-		
-		data_packet.type = 6;
+		data_packet.type = 1;
 		data_packet.sequence_number = chunks-1;
 		memcpy(data_packet.data,buffer[chunks-1],data_size);
 		memset(packet_tobe_sent,0,sizeof(struct packet));
@@ -265,10 +266,9 @@ int main(int argc, char *argv[])
 		n = recvfrom(sock,buffer1,sizeof(struct ack_packet),0,(struct sockaddr *)&from, &length);
 		if(n > 0)
 		{
-			printf("Packet 5 received : \n");
 			struct ack_packet* ack_packet3 = (struct ack_packet*)buffer1;
 			printf("type last %d\n",ack_packet3->type);
-			if(ack_packet3->type == 5 || ack_packet3->type == 3)
+			if(ack_packet3->type == 5)
 			{
 				printf("all packets sent \n");
 				break;
@@ -276,6 +276,61 @@ int main(int argc, char *argv[])
 
 		}
 	}
+	//struct packet* recv_packet = (struct packet*)packet_tobe_sent; 
+	//printf("recv_packet chunk no  : %d\n", recv_packet->sequence_number);
+	//fwrite (recv_packet->data, sizeof(char), final_chunk, oFile);
+	/* the whole file is now loaded in the memory buffer. */
+
+	// terminate
+	
+	
+	/*n = recvfrom(sock,buffer1,256,0,(struct sockaddr *)&from, &length);
+	if (n < 0) error("recvfrom");
+	write(1,"Got an ack: \n",12);
+	printf("%s\n",buffer1);
+
+	packet_tobe_sent = (unsigned char*)malloc(sizeof(struct packet));
+	int send_count = 0;
+	for(send_count = 0; send_count < chunks-1; send_count++)
+	{
+		data_packet.sequence_number = send_count;
+		memcpy(data_packet.data,buffer[send_count],data_size);
+		memset(packet_tobe_sent,0,sizeof(struct packet));
+		memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
+	  
+		n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
+		if (n < 0) error("Sendto");
+	}
+	printf("All packets sent first time \n");
+	data_packet.sequence_number = -1;
+	memcpy(data_packet.data,buffer[send_count],data_size);
+	memset(packet_tobe_sent,0,sizeof(struct packet));
+	memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
+  
+	n=sendto(sock,packet_tobe_sent,final_chunk,0,(const struct sockaddr *)&server,length);
+	if (n < 0) error("Sendto");
+
+	printf("Waiting for Ack to send last packet\n");
+	n = recvfrom(sock,buffer1,256,0,(struct sockaddr *)&from, &length);
+	if (n < 0) error("recvfrom");
+	printf("received ack now clear to send last packet : \n");
+	printf("%s\n",buffer1);
+
+
+	data_packet.sequence_number = send_count;
+	memcpy(data_packet.data,buffer[send_count],data_size);
+	memset(packet_tobe_sent,0,sizeof(struct packet));
+	memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
+  
+	n=sendto(sock,packet_tobe_sent,final_chunk,0,(const struct sockaddr *)&server,length);
+	if (n < 0) error("Sendto");
+	printf("size of last packet sent : %d\n",n);
+	printf("Waiting for final Ack \n");
+	n = recvfrom(sock,buffer1,256,0,(struct sockaddr *)&from, &length);
+	if (n < 0) error("recvfrom");
+	printf("last packet received at server : \n");
+	printf("%s\n",buffer1);*/
+	
 	close(sock);
 	fclose (pFile);
 	free (buffer);
@@ -287,3 +342,4 @@ void error(const char *msg)
     perror(msg);
     exit(0);
 }
+

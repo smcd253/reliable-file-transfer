@@ -170,9 +170,22 @@ int main(int argc, char *argv[])
 			{
 				
 				ack_packet1.type = 2;
-				memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
-				n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
+				int b;
+				
+				memcpy(send_buffer,(unsigned char*)&ack_packet1,chunks*sizeof(char));
+
+				for(b = 0; b<chunks;b++)
+				{
+					fprintf(f1,"%d",ack_packet1.packet_tracker[b]);
+
+				}
+				fprintf(f1,"\n");
+				n = sendto(sock,send_buffer,sizeof(struct ack_packet),0,(struct sockaddr *)&from,fromlen);
 				if (n  < 0) error("sendto");
+				//fprintf(f1, "before sending\n");
+				
+				fprintf(f1,"\n");
+				fprintf(f1,"\n");
 
 			}
 
@@ -184,31 +197,22 @@ int main(int argc, char *argv[])
 		n = recvfrom(sock,buf,final_chunk,0,(struct sockaddr *)&from,&fromlen);
 		printf("No of bytes received %d\n",n );
 		struct packet* data_packet = (struct packet*)buf;
-		printf("type %d : Received seq no : %d \n",data_packet->type,data_packet->sequence_number);
-		
+		printf("type %d\n",data_packet->type );
+		printf("Received seq no : %d\n",data_packet->sequence_number);
 		printf("1\n");
-		if(data_packet->type == 6)
+		if(data_packet->type == 1)
 		{
 			memcpy(buffer[data_packet->sequence_number],data_packet->data,final_chunk-1);
 			printf("2\n");
 			int s_count =0;
-			
 			for(s_count = 0;s_count<10;s_count++)
 			{
-				printf("Sending type5\n");
 				ack_packet1.type = 5;
 				memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
 				n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
 				if (n  < 0) error("sendto");
 			}
 			break;
-		}
-		else if(data_packet->type == 2)
-		{
-			ack_packet1.type = 3;
-			memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
-			n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
-			if (n  < 0) error("sendto");
 		}
 		
 	}
@@ -224,6 +228,53 @@ printf("3\n");
   fwrite (buffer[w_count], sizeof(char), final_chunk, oFile);
   printf("5\n");
 
+/*
+  
+  while(1)
+  {
+    
+     n = recvfrom(sock,buf,data_size,0,(struct sockaddr *)&from,&fromlen);
+     if (n < 0) error("recvfrom");
+
+     struct packet* data_packet = (struct packet*)buf;
+     printf("Received seq no : %d\n",data_packet->sequence_number);
+     if(data_packet->sequence_number == -1)
+     {
+      break;
+     }
+     memcpy(buffer[data_packet->sequence_number],data_packet->data,data_size);
+     if(packet_counter >= chunks-1)
+     {
+      break;
+     }
+     
+     packet_counter++;
+  }
+  printf("Packets received: %d\n",packet_counter);
+  while(1)
+  {
+    //printf("stopped\n");
+  }
+  n = sendto(sock,"send last packet\n",20,0,(struct sockaddr *)&from,fromlen);
+       if (n  < 0) error("sendto");
+
+  n = recvfrom(sock,buf,final_chunk,0,(struct sockaddr *)&from,&fromlen);
+  struct packet* data_packet = (struct packet*)buf;
+   printf("Received seq no : %d\n",data_packet->sequence_number);
+   memcpy(buffer[data_packet->sequence_number],data_packet->data,data_size);
+
+   n = sendto(sock,"last packet received\n",20,0,(struct sockaddr *)&from,fromlen);
+       if (n  < 0) error("sendto");
+
+  oFile = fopen ( "file/received_test1.mov" , "wb" );
+
+   /*int w_count = 0;
+  for(w_count = 0; w_count<chunks-1;w_count++)
+  {
+    fwrite (buffer[w_count] , sizeof(char), data_size, oFile);
+  }
+  
+  fwrite (buffer[w_count], sizeof(char), final_chunk, oFile);*/
   fclose (oFile);
   close(sock);
   
