@@ -15,7 +15,8 @@
 PACKET TYPE DESCRIPTIONS (to enumerate later)
 type 0: client --> server: init_packet
 type 1: client --> server: normal-sized data packets
-type 2: client --> server: client request server's missing packet sequence 
+type 2: client --> server: client request server's missing packet (ack) sequence
+type 2: server --> client: server sends updated missing packet (ack) sequence 
 type 3: server --> client: receiver ACKs everything except last packet
 type 4: server --> client: ACK - init_packet receipt
 type 5: server --> client: entire transaction done
@@ -71,7 +72,9 @@ int main(int argc, char *argv[])
 		exit(0);
 	}*/
 
-	// --------------------------------- STEP 0: open socket and bind ---------------------------
+	/******************************************************************************************************
+	 * STEP 0: open socket and bind
+	*******************************************************************************************************/
 	sock=socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock < 0) error("Opening socket");
 	length = sizeof(server);

@@ -18,7 +18,8 @@
 PACKET TYPE DESCRIPTIONS (to enumerate later)
 type 0: client --> server: init_packet
 type 1: client --> server: normal-sized data packets
-type 2: client --> server: client request server's missing packet sequence 
+type 2: client --> server: client request server's missing packet (ack) sequence
+type 2: server --> client: server sends updated missing packet (ack) sequence 
 type 3: server --> client: receiver ACKs everything except last packet
 type 4: server --> client: ACK - init_packet receipt
 type 5: server --> client: entire transaction done
@@ -256,9 +257,7 @@ int main(int argc, char *argv[])
 			printf("type %d\n",ack_packet1->type);
 			if(n > 0)
 			{
-				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				// if packet is of type 2 (??????????) it is the updated ack sequence from the receiver
-				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				// if packet is of type 2 it is the updated ack sequence from the receiver
 				if(ack_packet1->type == 2)
 				{
 					// print and log updated sequence

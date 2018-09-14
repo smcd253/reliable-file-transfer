@@ -15,7 +15,8 @@
 PACKET TYPE DESCRIPTIONS (to enumerate later)
 type 0: client --> server: init_packet
 type 1: client --> server: normal-sized data packets
-type 2: client --> server: client request server's missing packet sequence 
+type 2: client --> server: client request server's missing packet (ack) sequence
+type 2: server --> client: server sends updated missing packet (ack) sequence 
 type 3: server --> client: receiver ACKs everything except last packet
 type 4: server --> client: ACK - init_packet receipt
 type 5: server --> client: entire transaction done
