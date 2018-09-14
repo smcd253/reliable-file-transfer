@@ -12,7 +12,7 @@
 #include <stdbool.h>
  
 #define data_size 1400
-#define SERVER_ADDR "10.1.1.2"
+#define SERVER_ADDR "127.0.0.1"
 
 struct packet{
 	uint8_t type;
