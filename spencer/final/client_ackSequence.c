@@ -77,9 +77,7 @@ int main(int argc, char *argv[])
 	              exit(1);
 	}*/
 
-	/******************************************************************************************************
-	 * STEP 0a: open socket and connect to server 
-	*******************************************************************************************************/
+	// --------------------------------- STEP 0a: open socket and connect to server ---------------------------
 	sock= socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock < 0) error("socket");
 
@@ -91,9 +89,7 @@ int main(int argc, char *argv[])
 	server.sin_port = htons(atoi("12345"));
 	length=sizeof(struct sockaddr_in);
 
-	/******************************************************************************************************
-	 * STEP 0b: open source files and copy to DRAM
-	*******************************************************************************************************/
+	// --------------------------------- STEP 0b: open source files and copy to DRAM ---------------------------
   	//opening up a file 
 	pFile = fopen ( "data65.bin" , "rb" );
 	f2 = fopen ( "log_client.txt" , "w" ); // log file
@@ -129,9 +125,8 @@ int main(int argc, char *argv[])
 	result = fread (buffer[count],1,final_chunk,pFile);
 	printf("File Size read: %ld, count : %d\n", result,count);
 
-	/******************************************************************************************************
-	 * STEP 1: send init packet to start file stream
-	*******************************************************************************************************/
+	
+	// --------------------------------- STEP 1: send init packet to start file stream ----------------------------
 	// build out init_packet struct
 	init_packet.type = 0;
 	init_packet.file_size = lSize;
@@ -189,10 +184,8 @@ int main(int argc, char *argv[])
 		}
 		
 	}
-
-	/******************************************************************************************************
-	 * STEP 2a: send data (packet type 1)
-	*******************************************************************************************************/	
+	
+	// --------------------------------- STEP 2: send data ----------------------------------
 	packet_tobe_sent = (unsigned char*)malloc(sizeof(struct packet));
 	while(1)
 	{
@@ -227,9 +220,8 @@ int main(int argc, char *argv[])
 					printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 				}
 			}
-			/******************************************************************************************************
-	 		* STEP 2b: request updated ack sequence again
-			*******************************************************************************************************/	
+
+			// --------------------------------- STEP 2b: request updated ack sequence again ----------------------------------
 			// set state to 0 --> send type 2 packet (request updated ack sequence from server)
 			state_ch = 0;
 			data_packet.type = 2;
@@ -243,10 +235,7 @@ int main(int argc, char *argv[])
 			printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 			
 		}
-
-		/******************************************************************************************************
-		* STEP 2c: wait for cummulative ack and/pr re-request ack sequence
-		*******************************************************************************************************/	
+		// --------------------------------- STEP 2c: wait for cummulative ack and/pr re-request ack sequence ----------------------------------
 		// send type 2 packets
 		else
 		{
@@ -301,9 +290,7 @@ int main(int argc, char *argv[])
 		
 	}
 
-	/******************************************************************************************************
-	* STEP 3: send final packet and wait for ack of receipt
-	*******************************************************************************************************/	
+	// --------------------------------- STEP 3: send final packet and wait for ack of receipt----------------------------------
 	while(1)
 	{
 		// final packet is of type 6
