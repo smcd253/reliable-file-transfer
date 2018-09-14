@@ -13,6 +13,8 @@
  
 #define data_size 1400
 #define UDP_BURST 1
+#define BAD_SERVER_ADDR "10.1.1.2"
+#define GOOD_SERVER_ADDR "10.1.2.3"
 
 /*
 PACKET TYPE DESCRIPTIONS (to enumerate later)
@@ -85,7 +87,7 @@ int main(int argc, char *argv[])
 	if (sock < 0) error("socket");
 
 	server.sin_family = AF_INET;
-	hp = gethostbyname("127.0.0.1");
+	hp = gethostbyname(BAD_SERVER_ADDR);
 	if (hp==0) error("Unknown host");
 
 	bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
