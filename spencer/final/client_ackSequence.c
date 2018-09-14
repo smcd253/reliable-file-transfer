@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
 	char data[60000];
 	size_t result;
-	int chunks;
+	int totalChunks, remainingChunks, startChunk, endChunk;
 	int final_chunk;
 	struct packet data_packet = {0};
 	char * packet_tobe_sent;
@@ -95,7 +95,13 @@ int main(int argc, char *argv[])
 	/******************************************************************************************************
 	 * STEP 0b: open source files and copy to DRAM
 	*******************************************************************************************************/
-  	//opening up a file 
+  	// allocate memory to contain <= data_size amount of endChunk
+	startChunk = 0;
+	endChunk = totalChunks <= data_size ? totalChunks : data_size;
+	remainingChunks = totalChunks - endChunk;
+	bool updateChunks = false;
+	  
+	  //opening up a file 
 	pFile = fopen ( "data65.bin" , "rb" );
 	f2 = fopen ( "log_client.txt" , "w" ); // log file
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
@@ -105,27 +111,26 @@ int main(int argc, char *argv[])
 	lSize = ftell (pFile);
 	rewind (pFile);
 	printf("File Size: %ld\n", lSize);
-	chunks = ceil(lSize/(float)data_size);
+	totalChunks = ceil(lSize/(float)data_size);
 
-	// allocate memory to contain the whole file:
-	char **buffer = (char**) malloc (chunks*sizeof(char*));
+	char **buffer = (char**) malloc (totalChunks*sizeof(char*));
 	int count = 0;
 
 	/// reading from file into memory
-	for(count = 0; count < chunks - 1;count++)
+	for(count = 0; count < totalChunks - 1;count++)
 	{
 		buffer[count] = (char*) malloc (data_size*sizeof(char));
 		result = fread (buffer[count],1,data_size,pFile);
 	} 
-	printf("No of shunks : %d\n", chunks);
+	printf("No chunks : %d\n", totalChunks);
 	printf("Max file size : %ld\n", lSize);
-	printf("Memory read : %d\n", (chunks - 1)*data_size);
-	printf("Memory left to read : %ld\n", lSize - (chunks-1)*data_size);
+	printf("Memory read : %d\n", (totalChunks - 1)*data_size);
+	printf("Memory left to read : %ld\n", lSize - (totalChunks-1)*data_size);
 	printf("count value  : %d\n", count);
 
 
-	/// remaining memory chunk lSize - chunks*data_size
-	final_chunk = lSize - (chunks-1)*data_size;
+	/// remaining memory chunk lSize - (totalChunks-1)*data_size
+	final_chunk = lSize - (totalChunks-1)*data_size;
 	buffer[count] = (char*) malloc (final_chunk*sizeof(char));
 	result = fread (buffer[count],1,final_chunk,pFile);
 	printf("File Size read: %ld, count : %d\n", result,count);
@@ -152,155 +157,167 @@ int main(int argc, char *argv[])
 	// declare no-receipt timeout interval {seconds, microseconds}
 	int send_counter = 0;
 	struct timeval timeout={0,10000};
-    setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
-
-	// wait for ack from receiver for init_packet
-	while(1)
+	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
+	
+	int numRevolutions = 0;
+	while (remainingChunks > 0)
 	{
-		n = recvfrom(sock,buffer1,sizeof(struct Init_PACKET),0,(struct sockaddr *)&from, &length);
-
-		// if we've received something, parse to see if it's an ack of type 4
-		if(n > 0)
+		// if we've completed 1 iteration, update endChunk to take remainingChunks or next data_size block
+		if(updateChunks)
 		{
-			ack_packet1 = (struct ack_packet*)buffer1;
-			if(ack_packet1->type == 4)
-			{
-			    printf("\n");
-				printf("Ack of init received \n");
-				break;
-			}	
+			startChunk = endChunk; // would be plus 1, but we're avoiding the last packet until the end
+			endChunk = (remainingChunks <= data_size ? remainingChunks : data_size) + endChunk;
+			remainingChunks -= endChunk;
+			updateChunks = true;
+			numRevolutions++;
 		}
 
-		// if we haven't received anythin, resent init_packet
-		else
+		// wait for ack from receiver for init_packet
+		while(1)
 		{
-			for (send_counter = 0; send_counter < UDP_BURST;send_counter++)
-			{
-				init_packet.type = 0;
-				init_packet.file_size = lSize;
-				init_packet.chunk_size = data_size;
-				send_buffer = (unsigned char*)malloc(sizeof(struct Init_PACKET));
-				memset(send_buffer,0,sizeof(struct Init_PACKET));
-				memcpy(send_buffer,(const unsigned char*)&init_packet,sizeof(init_packet));
-				n=sendto(sock,send_buffer,sizeof(init_packet),0,(const struct sockaddr *)&server,length);
-				if (n < 0) error("Sendto");
-				free(send_buffer);
-				printf("Init packet no : %d\n",send_counter);
-			}
-		}
-		
-	}
+			n = recvfrom(sock,buffer1,sizeof(struct Init_PACKET),0,(struct sockaddr *)&from, &length);
 
-	/******************************************************************************************************
-	 * STEP 2a: send data (packet type 1)
-	*******************************************************************************************************/	
-	packet_tobe_sent = (unsigned char*)malloc(sizeof(struct packet));
-	while(1)
-	{
-		// --------------------------------- STEP 2a: send all data packets that aren't missing ----------------------------------
-		// state 1: sending type 1 packets
-		if(state_ch == 1)
-		{
-			// log ack sequence before sending out missing packets
-			fprintf(f2, "before update\n");
-			int b;
-			for(b = 0; b < chunks;b++)
+			// if we've received something, parse to see if it's an ack of type 4
+			if(n > 0)
 			{
-				fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
-			}
-			fprintf(f2,"\n");
-
-			// send out missing data packets (type 1)
-			int send_count = 0;
-			for(send_count = 0; send_count < chunks-1; send_count++)
-			{
-				if(ack_packet1->packet_tracker[send_count] == 0)
+				ack_packet1 = (struct ack_packet*)buffer1;
+				if(ack_packet1->type == 4)
 				{
-					data_packet.type = 1;
-					data_packet.sequence_number = send_count;
-					memcpy(data_packet.data,buffer[send_count],data_size);
-					memset(packet_tobe_sent,0,sizeof(struct packet));
-					memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
-					n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
-					
-					// error catch sendto and print out packet info
+					printf("\n");
+					printf("Ack of init received \n");
+					break;
+				}	
+			}
+
+			// if we haven't received anythin, resent init_packet
+			else
+			{
+				for (send_counter = 0; send_counter < UDP_BURST;send_counter++)
+				{
+					init_packet.type = 0;
+					init_packet.file_size = lSize;
+					init_packet.chunk_size = data_size;
+					send_buffer = (unsigned char*)malloc(sizeof(struct Init_PACKET));
+					memset(send_buffer,0,sizeof(struct Init_PACKET));
+					memcpy(send_buffer,(const unsigned char*)&init_packet,sizeof(init_packet));
+					n=sendto(sock,send_buffer,sizeof(init_packet),0,(const struct sockaddr *)&server,length);
 					if (n < 0) error("Sendto");
-					printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
+					free(send_buffer);
+					printf("Init packet no : %d\n",send_counter);
 				}
 			}
-			/******************************************************************************************************
-	 		* STEP 2b: request updated ack sequence again
-			*******************************************************************************************************/	
-			// set state to 0 --> send type 2 packet (request updated ack sequence from server)
-			state_ch = 0;
-			data_packet.type = 2;
-			data_packet.sequence_number = -1;
-			memset(packet_tobe_sent,0,sizeof(struct packet));
-			memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
-			n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
-			
-			// error catch sendto and print out packet info
-			if (n < 0) error("Sendto");
-			printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 			
 		}
 
 		/******************************************************************************************************
-		* STEP 2c: wait for cummulative ack and/pr re-request ack sequence
+		 * STEP 2a: send data (packet type 1)
 		*******************************************************************************************************/	
-		// send type 2 packets
-		else
+		packet_tobe_sent = (unsigned char*)malloc(sizeof(struct packet));
+		while(1)
 		{
-			// wait to receive updated ack sequence from server
-			n = recvfrom(sock,buffer1,sizeof(struct ack_packet),0,(struct sockaddr *)&from, &length);
-			ack_packet1 = (struct ack_packet*)buffer1;
-			printf("type %d\n",ack_packet1->type);
-			if(n > 0)
+			// --------------------------------- STEP 2a: send all data packets that aren't missing ----------------------------------
+			// state 1: sending type 1 packets
+			if(state_ch == 1)
 			{
-				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				// if packet is of type 2 (??????????) it is the updated ack sequence from the receiver
-				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				if(ack_packet1->type == 2)
+				// log ack sequence before sending out missing packets
+				fprintf(f2, "before update\n");
+				int b;
+				for(b = 0; b < endChunk;b++)
 				{
-					// print and log updated sequence
-					printf("update received \n");
-					fprintf(f2, "update\n");
-					int b;
-					for(b = 0; b < chunks;b++)
+					fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
+				}
+				fprintf(f2,"\n");
+
+				// send out missing data packets (type 1)
+				int send_count;
+				for(send_count = startChunk; send_count < endChunk-1; send_count++)
+				{
+					if(ack_packet1->packet_tracker[send_count] == 0)
 					{
-						fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
+						data_packet.type = 1;
+						data_packet.sequence_number = send_count;
+						memcpy(data_packet.data,buffer[send_count],data_size);
+						memset(packet_tobe_sent,0,sizeof(struct packet));
+						memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
+						n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
+						
+						// error catch sendto and print out packet info
+						if (n < 0) error("Sendto");
+						printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
 					}
-					fprintf(f2,"\n");
-
-					// change back to state one to resend missing packets (As identified by the updated ack sequence)
-					state_ch = 1;
 				}
-
-				// if packet type 3 --> move on to receiving last packet
-				else if(ack_packet1->type == 3)
-				{
-					printf("all packets received except last\n");
-					break;
-				}
-				
-			}
-
-			// if we did not receive the updated sequence --> resend the update sequence request
-			else
-			{
-				
+				/******************************************************************************************************
+				* STEP 2b: request updated ack sequence again
+				*******************************************************************************************************/	
+				// set state to 0 --> send type 2 packet (request updated ack sequence from server)
+				state_ch = 0;
 				data_packet.type = 2;
 				data_packet.sequence_number = -1;
 				memset(packet_tobe_sent,0,sizeof(struct packet));
 				memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
 				n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
-			
+				
+				// error catch sendto and print out packet info
 				if (n < 0) error("Sendto");
 				printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
+				
 			}
+
+			/******************************************************************************************************
+			* STEP 2c: wait for cummulative ack and/pr re-request ack sequence
+			*******************************************************************************************************/	
+			// send type 2 packets
+			else
+			{
+				// wait to receive updated ack sequence from server
+				n = recvfrom(sock,buffer1,sizeof(struct ack_packet),0,(struct sockaddr *)&from, &length);
+				ack_packet1 = (struct ack_packet*)buffer1;
+				printf("type %d\n",ack_packet1->type);
+				if(n > 0)
+				{
+					// if packet is of type 2 it is the updated ack sequence from the receiver
+					if(ack_packet1->type == 2)
+					{
+						// print and log updated sequence
+						printf("update received \n");
+						fprintf(f2, "update\n");
+						int b;
+						for(b = 0; b < endChunk;b++)
+						{
+							fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
+						}
+						fprintf(f2,"\n");
+
+						// change back to state one to resend missing packets (As identified by the updated ack sequence)
+						state_ch = 1;
+					}
+
+					// if packet type 3 --> move on to receiving last packet
+					else if(ack_packet1->type == 3)
+					{
+						printf("all packets received except last\n");
+						break;
+					}
+					
+				}
+
+				// if we did not receive the updated sequence --> resend the update sequence request
+				else
+				{
+					
+					data_packet.type = 2;
+					data_packet.sequence_number = -1;
+					memset(packet_tobe_sent,0,sizeof(struct packet));
+					memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
+					n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
+				
+					if (n < 0) error("Sendto");
+					printf("type: %d, sequence number : %d\n",data_packet.type,data_packet.sequence_number);
+				}
+			}
+			
 		}
-		
-	}
+	} // end revolution while
 
 	/******************************************************************************************************
 	* STEP 3: send final packet and wait for ack of receipt
@@ -309,8 +326,8 @@ int main(int argc, char *argv[])
 	{
 		// final packet is of type 6
 		data_packet.type = 6;
-		data_packet.sequence_number = chunks-1;
-		memcpy(data_packet.data,buffer[chunks-1],data_size);
+		data_packet.sequence_number = endChunk-1;
+		memcpy(data_packet.data,buffer[endChunk-1],data_size);
 		memset(packet_tobe_sent,0,sizeof(struct packet));
 		memcpy(packet_tobe_sent,(const unsigned char*)&data_packet,sizeof(data_packet));
 		n=sendto(sock,packet_tobe_sent,sizeof(data_packet),0,(const struct sockaddr *)&server,length);
