@@ -10,7 +10,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
- 
+#include <time.h>
+
 #define data_size 1400
 #define UDP_BURST 1
 #define BAD_SERVER_ADDR "10.1.1.2"
@@ -156,6 +157,10 @@ int main(int argc, char *argv[])
 	struct timeval timeout={0,10000};
     setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
 
+	// timer init
+	struct timespec start , stop;
+	double total;
+
 	// wait for ack from receiver for init_packet
 	while(1)
 	{
@@ -211,6 +216,10 @@ int main(int argc, char *argv[])
 				fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
 			}
 			fprintf(f2,"\n");
+
+			// start timer as we start sending data
+			clock_gettime(CLOCK_REALTIME , &start);
+			printf("Started timer!\n");
 
 			// send out missing data packets (type 1)
 			int send_count = 0;
@@ -332,6 +341,11 @@ int main(int argc, char *argv[])
 		}
 		// if we didn't get ack --> resend final packet
 	}
+
+	// stop timer
+  	clock_gettime(CLOCK_REALTIME, &stop);
+	total = stop.tv_sec - start.tv_sec;
+	printf("Total Transfer Time: %f seconds\n", total);
 
 	// clean up
 	close(sock);
