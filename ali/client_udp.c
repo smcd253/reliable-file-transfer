@@ -12,6 +12,7 @@
 #include <stdbool.h>
  
 #define data_size 1400
+#define SERVER_ADDR "10.1.1.2"
 
 struct packet{
 	uint8_t type;
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
 	if (sock < 0) error("socket");
 
 	server.sin_family = AF_INET;
-	hp = gethostbyname("127.0.0.1");
+	hp = gethostbyname(SERVER_ADDR);
 	if (hp==0) error("Unknown host");
 
 	bcopy((char *)hp->h_addr, (char *)&server.sin_addr,hp->h_length);
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
 
 	pFile = fopen ( "test.mov" , "rb" );
 	f2 = fopen ( "log_client.txt" , "w" );
-	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
+	if (pFile==NULL) {fputs ("File error\n",stderr); exit (1);}
 
 	// obtain file size:
 	fseek (pFile , 0 , SEEK_END);
