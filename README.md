@@ -15,3 +15,6 @@ read/write problem: https://codereview.stackexchange.com/questions/43914/client-
 
 CRC verificaiton:  https://www.linuxquestions.org/questions/programming-9/sending-files-over-udp-sockets-in-c-254978/
 
+to compile server_md5 and client mdf
+gcc server_md5.c -lm -lssl -lcrypto -o server
+gcc client_md5.c -lm -lssl -lcrypto -o client
