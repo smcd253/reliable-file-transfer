@@ -76,11 +76,12 @@ int main(int argc, char *argv[])
 	struct sockaddr_in server, from;
 	struct hostent *hp;
 
-	// soclet configuration
-	/*if (argc != 3) { printf("Usage: server port\n");
+	// filename
+	if (argc < 2) { printf("Usage: no filename provided\n");
 	              exit(1);
-	}*/
-
+	}
+	char* filename = malloc(256 * sizeof(char));
+	filename = argv[1];
 	/******************************************************************************************************
 	 * STEP 0a: open socket and connect to server 
 	*******************************************************************************************************/
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 	 * STEP 0b: open source files and copy to DRAM
 	*******************************************************************************************************/
   	//opening up a file 
-	pFile = fopen ( "data65.bin" , "rb" );
+	pFile = fopen ( filename , "rb" );
 	f2 = fopen ( "log_client.txt" , "w" ); // log file
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 
