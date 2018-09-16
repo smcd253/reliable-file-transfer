@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 	/******************************************************************************************************
 	 * Step 4: write memory buffer to file
 	*******************************************************************************************************/
-	oFile = fopen ( "received_test1.bin" , "wb" );
+	oFile = fopen ( "received_data.bin" , "wb" );
 	printf("3\n");
 	int w_count = 0;
 	for(w_count = 0; w_count<chunks-1;w_count++)
