@@ -42,10 +42,9 @@ struct packet{
 };
 
 struct ack_packet{
-	uint8_t type;
-	char packet_tracker[20000];
+  uint8_t type;
+  char packet_tracker[20000];
 };
-
 
 int main(int argc, char *argv[])
 {
@@ -125,8 +124,7 @@ int main(int argc, char *argv[])
 	} 
 	final_chunk = file_sz - (chunks-1)*data_size;
 	buffer[count] = (char*) malloc (final_chunk*sizeof(char));
-	
-	
+
 	/******************************************************************************************************
 	 * Step 1b: send type 4 (ack receipt of init_packet)
 	*******************************************************************************************************/

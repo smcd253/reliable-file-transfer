@@ -43,7 +43,7 @@ struct Init_PACKET{
 
 struct ack_packet{
 	uint8_t type;
-	uint8_t packet_tracker[20000];
+	uint8_t packet_tracker[data_size];
 };
 
 void error(const char *);
@@ -76,12 +76,17 @@ int main(int argc, char *argv[])
 	struct sockaddr_in server, from;
 	struct hostent *hp;
 
+
+
 	// filename
-	if (argc < 2) { printf("Usage: no filename provided\n");
+	if (argc < 3) { printf("Usage: no filename or server name provided\n");
 	              exit(1);
 	}
+	char* servername = malloc(256 * ( sizeof(char)));
+	servername = argv[1];
 	char* filename = malloc(256 * sizeof(char));
-	filename = argv[1];
+	filename = argv[2];
+	
 	/******************************************************************************************************
 	 * STEP 0a: open socket and connect to server 
 	*******************************************************************************************************/
@@ -220,6 +225,7 @@ int main(int argc, char *argv[])
 				fprintf(f2,"%d",ack_packet1->packet_tracker[b]);
 			}
 			fprintf(f2,"\n");
+			
 
 			// send out missing data packets (type 1)
 			int send_count = 0;
