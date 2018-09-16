@@ -14,7 +14,7 @@
 
 #define data_size 1400
 #define UDP_BURST 1
-#define BAD_SERVER_ADDR "10.1.1.2"
+#define BAD_SERVER_ADDR "10.1.1.3"
 #define GOOD_SERVER_ADDR "10.1.2.3"
 
 /*
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	 * STEP 0b: open source files and copy to DRAM
 	*******************************************************************************************************/
   	//opening up a file 
-	pFile = fopen ( filename , "rb" );
+	pFile = fopen ( data.bin , "rb" );
 	f2 = fopen ( "log_client.txt" , "w" ); // log file
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 
