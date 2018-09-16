@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define data_size 50000
+#define data_size 25000
 #define UDP_BURST 1
 #define BAD_SERVER_ADDR "10.1.1.3"
 #define GOOD_SERVER_ADDR "10.1.2.3"
@@ -43,7 +43,7 @@ struct Init_PACKET{
 
 struct ack_packet{
 	uint8_t type;
-	bool packet_tracker[60000];
+	bool packet_tracker[3000];
 };
 
 void error(const char *);
