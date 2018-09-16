@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define data_size 50000
+#define data_size 25000
 
 /*
 PACKET TYPE DESCRIPTIONS (to enumerate later)
@@ -43,7 +43,7 @@ struct packet{
 
 struct ack_packet{
   uint8_t type;
-  bool packet_tracker[60000];
+  bool packet_tracker[3000];
 };
 
 int main(int argc, char *argv[])
