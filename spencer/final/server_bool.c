@@ -43,7 +43,7 @@ struct packet{
 
 struct ack_packet{
   uint8_t type;
-  bool packet_tracker[74899];
+  bool packet_tracker[60000];
 };
 
 int main(int argc, char *argv[])
