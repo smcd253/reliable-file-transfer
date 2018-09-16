@@ -43,7 +43,7 @@ struct Init_PACKET{
 
 struct ack_packet{
 	uint8_t type;
-	bool packet_tracker[74899];
+	bool packet_tracker[60000];
 };
 
 void error(const char *);
