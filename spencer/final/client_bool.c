@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define data_size 1400
+#define data_size 32000
 #define UDP_BURST 1
 #define BAD_SERVER_ADDR "10.1.1.3"
 #define GOOD_SERVER_ADDR "10.1.2.3"
@@ -43,7 +43,7 @@ struct Init_PACKET{
 
 struct ack_packet{
 	uint8_t type;
-	bool packet_tracker[data_size];
+	bool packet_tracker[100000];
 };
 
 void error(const char *);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	 * STEP 0b: open source files and copy to DRAM
 	*******************************************************************************************************/
   	//opening up a file 
-	pFile = fopen ( "data.bin" , "rb" );
+	pFile = fopen ( filename , "rb" );
 	f2 = fopen ( "log_client.txt" , "w" ); // log file
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 

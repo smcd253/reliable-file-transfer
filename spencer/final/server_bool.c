@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define data_size 1400
+#define data_size 32000
 
 /*
 PACKET TYPE DESCRIPTIONS (to enumerate later)
@@ -43,7 +43,7 @@ struct packet{
 
 struct ack_packet{
   uint8_t type;
-  bool packet_tracker[data_size];
+  bool packet_tracker[10000];
 };
 
 int main(int argc, char *argv[])
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	struct sockaddr_in server;
 	struct sockaddr_in from;
 	char buf[63000];
-	char send_buffer[10000];
+	char send_buffer[100000];
 	int chunks, final_chunk;
 	bool init_check = 0, mem_alloc_ch=0, data_check=0;
 	int cons_check = 0;
@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
 	int b=0;
 	printf("Type packet1 %d\n",ack_packet1.type);
 	memcpy(send_buffer,(unsigned char*)&ack_packet1,sizeof(ack_packet1));
+	printf("failed at send_buffer memcpy\n");
 	n = sendto(sock,send_buffer,sizeof(ack_packet1),0,(struct sockaddr *)&from,fromlen);
 	if (n  < 0) error("sendto");
 	mem_alloc_ch = 1;
