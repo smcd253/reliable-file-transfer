@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	 * STEP 0b: open source files and copy to DRAM
 	*******************************************************************************************************/
   	//opening up a file 
-	pFile = fopen ( data.bin , "rb" );
+	pFile = fopen ( "data.bin" , "rb" );
 	f2 = fopen ( "log_client.txt" , "w" ); // log file
 	if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 
