@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define data_size 3200
+#define data_size 1400
 
 /*
 PACKET TYPE DESCRIPTIONS (to enumerate later)
