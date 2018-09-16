@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define data_size 100000
+#define data_size 200000
 #define UDP_BURST 1
 #define BAD_SERVER_ADDR "10.1.1.3"
 #define GOOD_SERVER_ADDR "10.1.2.3"
